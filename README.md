@@ -110,21 +110,21 @@ e PRs não saem. Com MCP Context7 disponível, os fluxos conferem versões de
 ferramentas na documentação atual antes de decidir.
 
 ---
+# insc.gg
 
-> ✂️ **Daqui para baixo é a vitrine do SEU projeto.** Apague tudo acima desta
-> linha (incluindo ela) quando o projeto tiver nome, e preencha o que segue.
-
-# [Nome do projeto]
-
-[Uma frase: o problema que resolve e para quem.]
+Sistema de inscrição para campeonatos de e-sports: organizadores publicam
+campeonatos, capitães inscrevem seus times, pagam a taxa via gateway sandbox
+e montam o elenco convidando jogadores.
 
 ## Autores
 
-- [Nome — GitHub]
+- João Victor Santos Bacelar — [@BacelarJV](https://github.com/BacelarJV)
+- Jose Junior — [@josejunior2023](https://github.com/josejunior2023)
 
 ## Stack
 
-[Preenchida a partir do `docs/architecture.md` — backend, frontend, banco.]
+- Backend: Python + FastAPI + SQLAlchemy + PostgreSQL
+- Frontend: TypeScript + React + TailwindCSS + Shadcn/UI
 
 ## Em produção
 
