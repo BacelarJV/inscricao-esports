@@ -60,7 +60,7 @@
 > Toda story nasce `⚪ Draft` — **só o aluno promove a `🟡 Ready`**; `🟢 Live`
 > só depois do PR mesclado (o auditor final confere).
 
-### US01 — Criação de Campeonato · `Must Have` · `M` · Status: `⚪ Draft`
+### US01 — Criação de Campeonato · `Must Have` · `M` · Status: `🟡 Ready`
 
 <!-- Status: `⚪ Draft` (não codificar) · `🟡 Ready` (vira Issue) · `🟢 Live` (PR mesclado) -->
 
@@ -76,7 +76,7 @@
 
 ---
 
-### US02 — Cadastro de Equipe · `Must Have` · `S` · Status: `⚪ Draft`
+### US02 — Cadastro de Equipe · `Must Have` · `S` · Status: `🟡 Ready`
 
 **Como** Capitão, **eu quero** cadastrar uma equipe com nome e tag **para que** eu possa representar meu time nos campeonatos.
 
@@ -90,7 +90,7 @@
 
 ---
 
-### US03 — Inscrição da Equipe no Torneio · `Must Have` · `M` · Status: `⚪ Draft`
+### US03 — Inscrição da Equipe no Torneio · `Must Have` · `M` · Status: `🟡 Ready`
 
 **Como** Capitão, **eu quero** inscrever minha equipe em um campeonato aberto **para que** seja gerado o pedido de inscrição para posterior pagamento.
 
@@ -105,7 +105,7 @@
 
 ---
 
-### US04 — Pagamento da Taxa de Inscrição · `Must Have` · `M` · Status: `⚪ Draft`
+### US04 — Pagamento da Taxa de Inscrição · `Must Have` · `M` · Status: `🟡 Ready`
 
 **Como** Capitão, **eu quero** iniciar o pagamento da taxa da inscrição pendente **para que** eu possa quitar o valor e assegurar a vaga do meu time.
 
@@ -119,7 +119,7 @@
 
 ---
 
-### US05 — Confirmação de Inscrição via Webhook · `Must Have` · `M` · Status: `⚪ Draft`
+### US05 — Confirmação de Inscrição via Webhook · `Must Have` · `M` · Status: `🟡 Ready`
 
 **Como** Sistema / Organizador, **eu quero** processar as notificações assíncronas do gateway de pagamento **para que** o status da inscrição seja atualizado automaticamente para "Confirmada".
 
@@ -133,7 +133,7 @@
 
 ---
 
-### US06 — Convidar Jogadores para o Elenco · `Must Have` · `M` · Status: `⚪ Draft`
+### US06 — Convidar Jogadores para o Elenco · `Must Have` · `M` · Status: `🟡 Ready`
 
 **Como** Capitão, **eu quero** convidar jogadores para o elenco do meu time **para que** possamos completar a escalação necessária para disputar o campeonato.
 
@@ -147,7 +147,7 @@
 
 ---
 
-### US07 — Aceite ou Recusa de Convite pelo Jogador · `Must Have` · `S` · Status: `⚪ Draft`
+### US07 — Aceite ou Recusa de Convite pelo Jogador · `Must Have` · `S` · Status: `🟡 Ready`
 
 **Como** Jogador, **eu quero** responder aos convites de equipe recebidos **para que** eu decida se faço ou não parte do time.
 
@@ -161,7 +161,7 @@
 
 ---
 
-### US08 — Painel Público de Equipes Confirmadas · `Could Have` · `S` · Status: `⚪ Draft`
+### US08 — Painel Público de Equipes Confirmadas · `Could Have` · `S` · Status: `🟡 Ready`
 
 **Como** Visitante ou Competidor, **eu quero** visualizar a lista de equipes com inscrição confirmada no campeonato **para que** eu possa acompanhar quem já garantiu vaga.
 
@@ -173,7 +173,7 @@
 
 **Regras relacionadas:** RN03
 
-### US09 — Encerramento Automático por Elenco Incompleto · `Must Have` · `M` · Status: `⚪ Draft`
+### US09 — Encerramento Automático por Elenco Incompleto · `Must Have` · `M` · Status: `🟡 Ready`
 
 **Como** Sistema, **eu quero** verificar se cada time atingiu o mínimo de jogadores até o prazo de inscrição **para que** vagas de times incompletos sejam liberadas automaticamente.
 
