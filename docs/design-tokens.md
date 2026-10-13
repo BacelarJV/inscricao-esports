@@ -2,7 +2,7 @@
 
 **Projeto:** Sistema de Inscrição para Campeonatos de E-sports  
 **Versão:** 1.0.0  
-**Última atualização:** 2026-09-29  
+**Última atualização:** 2026-10-13  
 
 > 🤖 **Este documento existe para a IA parar de inventar um botão diferente a cada
 > tela.** Não é um design system — é o mínimo que dá à prototipagem assistida algo a
@@ -64,10 +64,13 @@ Família principal: `Inter`, sans-serif.
 
 ## Protótipo
 
-**Link:** [Protótipo no Stitch](https://stitch.withgoogle.com/preview/11000728704193360087?node-id=d2cf76c9d7d9414cba740122ff3cab60)  
-**Telas (Jornada 1):**
-1. **Detalhes do Campeonato & Inscrição de Equipe** (listagem de vagas disponíveis e ação principal de confirmação de inscrição)
-2. **Checkout da Taxa de Inscrição** (resumo de cobrança com vaga retida até encerramento do prazo)
-3. **Confirmação de Inscrição Garantida** (status aprovado, slot travado com equipe confirmada)
-4. **Processando Pagamento / Painel de Retomada** (acompanhamento de status e reabertura do checkout)
-5. **Lista de Espera** (alerta de encerramento de vagas regulares e posicionamento na fila)
+**Link:** [Protótipo no Stitch](https://stitch.withgoogle.com/projects/11000728704193360087)  
+**Telas:**
+1. **Detalhes do Campeonato**
+2. **Checkout da Taxa de Inscrição**
+3. **Processando Pagamento**
+4. **Confirmação de Inscrição**
+5. **Lista de Espera**
+6. **Criar Campeonato**
+7. **Meu Time**
+8. **Meus Convites**
