@@ -119,7 +119,7 @@ e montam o elenco convidando jogadores.
 ## Autores
 
 - João Victor Santos Bacelar — [@BacelarJV](https://github.com/BacelarJV)
-- Jose Junior — [@josejunior2023](https://github.com/josejunior2023)
+- José Albanir de Re Júnior — [@josejunior2023](https://github.com/josejunior2023)
 
 ## Stack
 
