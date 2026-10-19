@@ -25,12 +25,12 @@
 
 ## RA1 — Arquitetura, Engenharia de Requisitos com IA e Gestão Ágil
 
-- [ ] **ID1:** Estruturou o PRD e o SDD (Diagrama Mermaid) de forma clara, utilizando a IA para modelar o negócio.
+- [x] **ID1:** Estruturou o PRD e o SDD (Diagrama Mermaid) de forma clara, utilizando a IA para modelar o negócio.
   > No ID1, "SDD" é o *Software Design Document* — neste repositório ele se chama `docs/architecture.md`, porque a sigla já significa Spec-Driven Development (o guia explica).
-- [ ] **ID2:** A aplicação foi estruturada em formato de Monorepo (Front + Back) no GitHub.
-- [ ] **ID3:** Mapeou o PRD em Histórias de Usuário no GitHub Projects, criando um backlog rastreável de Issues.
+- [x] **ID2:** A aplicação foi estruturada em formato de Monorepo (Front + Back) no GitHub.
+- [x] **ID3:** Mapeou o PRD em Histórias de Usuário no GitHub Projects, criando um backlog rastreável de Issues.
 - [ ] **ID4:** Para as histórias implementadas, registrou no repositório a especificação e o plano derivados da Issue antes da codificação.
-- [ ] **ID5:** Demonstrou domínio do GitHub Flow, isolando features em branches curtas e utilizando Pull Requests para integração na main.
+- [x] **ID5:** Demonstrou domínio do GitHub Flow, isolando features em branches curtas e utilizando Pull Requests para integração na main.
 
 ## RA2 — Desenvolvimento Backend Assistido por IA
 
