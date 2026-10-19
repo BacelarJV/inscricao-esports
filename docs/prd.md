@@ -1,8 +1,8 @@
 # 📄 Product Requirements Document (PRD)
 
 **Projeto:** Sistema de Inscrição para Campeonatos de E-sports  
-**Versão:** 1.0.0  
-**Última atualização:** 2026-09-24  
+**Versão:** 1.2.0  
+**Última atualização:** 2026-10-14  
 
 > 🤖 **Este documento é a fonte da verdade sobre o QUE o produto faz.** Regra de
 > negócio que não estiver aqui não existe — nem para a equipe, nem para a IA.
@@ -30,10 +30,13 @@
 | **Campeonato** | Evento competitivo com regras, vagas limitadas e taxa de inscrição definida. | Partida individual ou Fase do torneio. |
 | **Time (Equipe)** | Agrupamento de jogadores registrado por um capitão para disputar torneios. | Organização do torneio ou Inscrição. |
 | **Capitão** | Usuário líder da equipe, responsável por criar o time, inscrevê-lo, pagar a taxa e convidar jogadores. | Jogador convidado comum ou Organizador. |
-| **Jogador** | Usuário que recebe e aceita convite para compor o elenco de um time. | Capitão (não possui poderes de gestão ou pagamento do time). |
+| **Jogador** | Atleta convidado pelo capitão que aceita ou recusa o convite por um link, sem cadastro prévio, para compor o elenco de um time. | Capitão (não possui poderes de gestão ou pagamento do time). |
 | **Organizador** | Usuário/entidade responsável por criar o campeonato e gerenciar suas inscrições. | Capitão ou Jogador. |
 | **Inscrição** | Vínculo de um time a um campeonato específico, garantida após confirmação de pagamento. | Cadastro do time na plataforma. |
 | **Pagamento** | Transação financeira que liquida a taxa de inscrição e valida a vaga do time no campeonato. | Premiação do campeonato. |
+| **Convite** | Link único gerado pelo capitão para um jogador entrar no elenco do time; vale 72 horas e fica Pendente até o jogador aceitar ou recusar, sem precisar de cadastro. | Inscrição do time no campeonato. |
+| **Elenco** | Conjunto de jogadores que aceitaram o convite e compõem o time; o capitão faz parte dele. | Time (o time existe mesmo com o elenco incompleto). |
+| **Lista de Espera** | Fila de times que pediram inscrição depois de esgotadas as vagas, atendida por ordem de chegada quando uma vaga é liberada. | Inscrição confirmada. |
 
 ---
 
@@ -45,7 +48,9 @@
 | :--- | :----- | :--- | :------- |
 | **Organizador** | Responsável pelo evento de e-sports. | Criar e publicar campeonatos; definir taxa de inscrição e limite de vagas; visualizar inscrições e status de pagamento. | Inscrever times em campeonatos de terceiros; alterar escalação dos times inscritos; aprovar pagamentos manualmente. |
 | **Capitão** | Líder da equipe inscrita ou a inscrever. | Criar seu time; inscrever o time em campeonatos abertos; efetuar pagamento da taxa de inscrição; convidar e remover jogadores do elenco do seu time. | Criar campeonatos; alterar taxa de torneio; inscrever times que não sejam o seu; convidar membros para times de outros capitães. |
-| **Jogador** | Atleta convidado para compor um elenco. | Visualizar convites recebidos; aceitar ou recusar convites de times; visualizar os detalhes do campeonato e do seu time. | Inscrever o time em campeonatos; pagar taxa de inscrição em nome do time; convidar outros membros; criar campeonatos. |
+| **Jogador** | Atleta convidado para compor um elenco. | Abrir o convite recebido por link, sem cadastro prévio; aceitar ou recusar o convite; ver os detalhes do campeonato e do time. | Inscrever o time em campeonatos; pagar taxa de inscrição em nome do time; convidar outros membros; criar campeonatos. |
+
+> Organizador e Capitão têm conta e escolhem o perfil no cadastro. O Jogador não precisa de conta: ele responde ao convite por um link único.
 
 ---
 
@@ -64,12 +69,12 @@
 
 <!-- Status: `⚪ Draft` (não codificar) · `🟡 Ready` (vira Issue) · `🟢 Live` (PR mesclado) -->
 
-**Como** Organizador, **eu quero** criar um campeonato definindo nome, taxa de inscrição, número máximo de vagas, número mínimo e máximo de jogadores por time e período de inscrição.
+**Como** Organizador, **eu quero** criar um campeonato definindo nome, jogo, taxa de inscrição, número máximo de vagas, número mínimo e máximo de jogadores por time e prazo final de inscrição.
 
 **Critérios de aceite:**
-- [ ] **Dado** que informo mínimo de jogadores maior que o máximo, quando submeto a criação, então o sistema rejeita com erro de validação.
-- [ ] **Dado** que sou um organizador autenticado, **quando** submeto dados válidos (nome, taxa > 0, vagas >= 2 e datas válidas), **então** o campeonato é criado com status "Aberto" e listado para inscrições.
-- [ ] **Dado** dados inválidos (ex.: taxa negativa, vagas zeradas ou data de fim anterior à de início), **quando** tento criar o torneio, **então** a criação é rejeitada com mensagem de erro descritiva.
+- [ ] **Dado** que informo mínimo de jogadores maior que o máximo, **quando** submeto a criação, **então** o sistema rejeita com erro de validação.
+- [ ] **Dado** que sou um organizador autenticado, **quando** submeto dados válidos (nome, jogo, taxa > 0, vagas >= 2, mínimo e máximo de jogadores coerentes e prazo final no futuro), **então** o campeonato é criado com status "Aberto" e listado para inscrições.
+- [ ] **Dado** dados inválidos (ex.: taxa negativa, vagas zeradas ou prazo final no passado), **quando** tento criar o torneio, **então** a criação é rejeitada com mensagem de erro descritiva.
 - [ ] **Dado** um usuário com perfil comum (não organizador), **quando** tenta criar um campeonato, **então** o acesso é bloqueado com erro 403 Forbidden.
 
 **Regras relacionadas:** RN02
@@ -82,7 +87,7 @@
 
 **Critérios de aceite:**
 
-- [ ] **Dado** que sou um usuário autenticado, **quando** informo um nome e tag únicos, **então** a equipe é criada associando meu perfil como Capitão.
+- [ ] **Dado** que sou um usuário autenticado com perfil de Capitão, **quando** informo um nome e tag únicos, **então** a equipe é criada com meu perfil como líder e eu já entro no elenco.
 - [ ] **Dado** que o nome ou tag da equipe já esteja em uso por outro time, **quando** tento submeter o cadastro, **então** a criação é recusada com erro de conflito.
 - [ ] **Dado** que envio campos em branco ou fora do tamanho limite, **quando** tento cadastrar, **então** o sistema rejeita a criação antes de persistir os dados.
 
@@ -98,10 +103,10 @@
 
 - [ ] **Dado** que sou capitão de um time e o campeonato está com inscrições abertas e vagas disponíveis, **quando** solicito a inscrição, **então** uma inscrição com status "Pendente de Pagamento" é gerada vinculando meu time ao campeonato.
 - [ ] **Dado** que o campeonato já atingiu o limite de vagas disponíveis, **quando** solicito a inscrição, **então** o time entra na lista de espera com status "Aguardando Vaga", sem ser recusado.
-- [ ] **Dado** que minha equipe já possui inscrição ativa (pendente ou confirmada) no mesmo torneio, **quando** tento inscrever novamente, **então** a operação é impedida com mensagem de inscrição duplicada.
-- [ ] **Dado** que uma vaga é liberada (inscrição expirada ou cancelada), **quando** há times na lista de espera, **então** o primeiro da fila é promovido automaticamente para "Pendente de Pagamento".
+- [ ] **Dado** que minha equipe já possui inscrição ativa (pendente, em lista de espera ou confirmada) no mesmo torneio, **quando** tento inscrever novamente, **então** a operação é impedida com mensagem de inscrição duplicada.
+- [ ] **Dado** que uma vaga é liberada (inscrição expirada ou cancelada), **quando** há times na lista de espera, **então** o primeiro da fila é promovido automaticamente para "Pendente de Pagamento" e tem 24 horas para pagar (RN07).
 
-**Regras relacionadas:** RN01, RN02, RN04
+**Regras relacionadas:** RN01, RN02, RN04, RN07, RN09
 
 ---
 
@@ -113,9 +118,11 @@
 
 - [ ] **Dado** uma inscrição pendente do meu time, **quando** inicio o checkout de pagamento, **então** é gerada a cobrança/sessão no gateway com o valor exato da taxa do torneio.
 - [ ] **Dado** que a inscrição já foi paga anteriormente, **quando** tento gerar nova cobrança, **então** o sistema bloqueia a ação informando que a inscrição já está quitada.
-- [ ] **Dado** que a janela de inscrições do campeonato foi encerrada antes da tentativa de pagamento, **quando** tento pagar, **então** a cobrança não é permitida e a inscrição é expirada.
+- [ ] **Dado** que fechei o checkout sem pagar e ainda estou dentro dos 15 minutos de reserva, **quando** volto ao painel do meu time, **então** a inscrição continua "Pendente de Pagamento", a vaga segue reservada e posso retomar o pagamento (RN09).
+- [ ] **Dado** que os 15 minutos de reserva terminaram sem pagamento, **quando** o prazo vence, **então** a inscrição é cancelada por expiração, a vaga é liberada e o primeiro da lista de espera é promovido (RN09, RN07).
+- [ ] **Dado** que o prazo final do campeonato encerrou antes da tentativa de pagamento e meu time não foi promovido da lista de espera, **quando** tento pagar, **então** a cobrança não é permitida e a inscrição é cancelada por expiração.
 
-**Regras relacionadas:** RN02, RN03, RN04
+**Regras relacionadas:** RN02, RN03, RN04, RN07, RN09
 
 ---
 
@@ -127,7 +134,7 @@
 
 - [ ] **Dado** que o gateway envia um webhook com assinatura válida indicando pagamento aprovado, **quando** o evento é processado, **então** o status do pagamento é registrado como "Aprovado" e a inscrição passa para "Confirmada", garantindo a vaga do time.
 - [ ] **Dado** um webhook com assinatura inválida ou cabeçalho adulterado, **quando** a notificação chega, **então** o sistema rejeita a requisição (status 401/400) e nenhuma alteração de status ocorre.
-- [ ] **Dado** um webhook notificando recusa ou falha no pagamento, **quando** processado, **então** o status do pagamento é marcado como "Recusado" e a inscrição permanece não confirmada.
+- [ ] **Dado** um webhook notificando recusa ou falha no pagamento, **quando** processado, **então** o status do pagamento é marcado como "Recusado" e a inscrição segue "Pendente de Pagamento", permitindo nova tentativa enquanto a reserva da RN09 (ou a janela da RN07) não encerrar.
 
 **Regras relacionadas:** RN03, RN06
 
@@ -139,7 +146,7 @@
 
 **Critérios de aceite:**
 
-- [ ] **Dado** que sou o capitão do time, **quando** envio convite informando o identificador/e-mail de um jogador válido, **então** um convite com status "Pendente" é registrado para aquele jogador.
+- [ ] **Dado** que sou o capitão do time, **quando** informo o e-mail de um jogador, **então** um convite com status "Pendente" é registrado e um link único, válido por 72 horas, é gerado para eu copiar e enviar ao jogador.
 - [ ] **Dado** que o jogador convidado já faz parte da equipe ou já possui convite pendente para a mesma equipe, **quando** tento enviar o convite, **então** a ação é barrada com aviso de duplicidade.
 - [ ] **Dado** que o limite máximo de membros da equipe foi atingido, **quando** o capitão tenta enviar um novo convite, **então** o envio é bloqueado por limite de elenco.
 
@@ -153,9 +160,9 @@
 
 **Critérios de aceite:**
 
-- [ ] **Dado** que tenho um convite pendente, **quando** escolho "Aceitar", **então** meu vínculo com a equipe é efetivado como membro ativo e o convite marcado como "Aceito".
-- [ ] **Dado** que tenho um convite pendente, **quando** escolho "Recusar", **então** o convite é arquivado como "Recusado" sem criar vínculo com o time.
-- [ ] **Dado** que o jogador não possui convites pendentes, **quando** acessa a área de convites, **então** é exibida uma mensagem de lista vazia.
+- [ ] **Dado** que abri o link de um convite pendente, mesmo sem ter conta, **quando** escolho "Aceitar", **então** meu vínculo com a equipe é efetivado como membro ativo e o convite marcado como "Aceito".
+- [ ] **Dado** que abri o link de um convite pendente, **quando** escolho "Recusar", **então** o convite é arquivado como "Recusado" sem criar vínculo com o time.
+- [ ] **Dado** que o link do convite expirou (72 horas) ou já foi respondido, **quando** o jogador o abre, **então** é exibida uma mensagem informando que o convite não está mais disponível.
 
 **Regras relacionadas:** RN05
 
@@ -179,10 +186,11 @@
 
 **Critérios de aceite:**
 
-- [ ] **Dado** que o prazo de inscrição se encerra e o time não atingiu o mínimo de jogadores configurado, **quando** a verificação roda, **então** a inscrição é cancelada automaticamente e a vaga é liberada.
+- [ ] **Dado** que o prazo de inscrição se encerra e o time não atingiu o mínimo de jogadores configurado, **quando** a verificação roda, **então** a inscrição é cancelada automaticamente, mesmo que já esteja paga e confirmada (RN08), e a vaga é liberada.
 - [ ] **Dado** que o time atingiu o mínimo antes do prazo, **quando** o prazo se encerra, **então** a inscrição permanece válida.
+- [ ] **Dado** que a vaga de um time cancelado por elenco incompleto é liberada, **quando** há times na lista de espera, **então** o primeiro da fila é promovido conforme a RN07.
 
-**Regras relacionadas:** RN05, RN08
+**Regras relacionadas:** RN05, RN07, RN08
 
 ---
 
@@ -190,14 +198,15 @@
 
 | ID | Regra | Histórias Relacionadas |
 | :-- | :---- | :--------------------- |
-| **RN01** | **Unicidade de Inscrição:** Uma equipe só pode possuir uma única inscrição (pendente ou confirmada) por campeonato. | US03 |
-| **RN02** | **Capacidade e Prazo de Vagas:** Inscrições só podem ser abertas ou pagas enquanto o campeonato estiver com status "Aberto", dentro do prazo limite e com vagas disponíveis. | US01, US03, US04 |
+| **RN01** | **Unicidade de Inscrição:** Uma equipe só pode possuir uma única inscrição (pendente, em lista de espera ou confirmada) por campeonato. | US03 |
+| **RN02** | **Capacidade e Prazo de Vagas:** Inscrições só podem ser abertas ou pagas enquanto o campeonato estiver com status "Aberto", dentro do prazo limite e com vagas disponíveis (ou na lista de espera). O pagamento do time promovido da lista de espera segue a janela da RN07. | US01, US03, US04 |
 | **RN03** | **Confirmação Exclusiva por Pagamento:** A vaga do time no campeonato só é garantida e alterada para "Confirmada" após a confirmação de liquidação via webhook do gateway de pagamento. | US04, US05, US08 |
 | **RN04** | **Liderança Exclusiva do Capitão:** Somente o criador/capitão da equipe tem poderes para inscrever o time, gerar ordens de pagamento e convidar/remover membros do elenco. | US02, US03, US04, US06 |
-| **RN05** | **Composição e Limite de Elenco:** O elenco da equipe possui um limite máximo de membros (ex.: 5 titulares + até 2 reservas). Um jogador não pode ser adicionado em duplicidade ao mesmo time. | US06, US07 |
-| **RN06** | **Imutabilidade de Inscrição Quitada:** Uma vez que o pagamento foi aprovado e a vaga confirmada, o status não pode ser alterado de volta para "Pendente" nem cancelado unilateralmente pelo capitão. | US05 |
-| **RN07** | **Lista de Espera:** Quando as vagas se esgotam, novas inscrições entram em fila ordenada por ordem de chegada; vaga liberada promove automaticamente o primeiro da fila. | US03 |
-| **RN08** | **Mínimo de Elenco Obrigatório:** Toda inscrição deve atingir o número mínimo de jogadores configurado pelo organizador até o fim do prazo, sob pena de cancelamento automático. | US06, US09 |
+| **RN05** | **Composição e Limite de Elenco:** O elenco da equipe tem um número mínimo e máximo de jogadores, definidos pelo organizador no campeonato (US01). O capitão conta como membro do elenco. Um jogador (identificado pelo e-mail do convite) não pode ser adicionado em duplicidade ao mesmo time. O convite é um link único, com validade de 72 horas, respondido sem cadastro prévio. | US02, US06, US07, US09 |
+| **RN06** | **Imutabilidade de Inscrição Quitada:** Uma vez que o pagamento foi aprovado e a vaga confirmada, o status não pode ser alterado de volta para "Pendente" nem cancelado unilateralmente pelo capitão; a única exceção é o cancelamento automático da RN08. | US05, US09 |
+| **RN07** | **Lista de Espera:** Quando as vagas se esgotam, novas inscrições entram em fila ordenada por ordem de chegada; vaga liberada promove automaticamente o primeiro da fila, que passa a "Pendente de Pagamento" e tem 24 horas, contadas da promoção, para pagar, mesmo que o prazo de inscrição já tenha encerrado. Se não pagar nesse tempo, a inscrição é cancelada e a vaga passa ao próximo da fila. | US03, US09 |
+| **RN08** | **Mínimo de Elenco Obrigatório:** Toda inscrição deve atingir o número mínimo de jogadores configurado pelo organizador até o fim do prazo, sob pena de cancelamento automático, mesmo que a inscrição já esteja paga e confirmada. A taxa não é devolvida pelo sistema: o reembolso é tratado fora dele (ver Fora de Escopo). | US06, US09 |
+| **RN09** | **Reserva de Vaga no Checkout:** Ao confirmar a inscrição, a vaga fica reservada ao time por 15 minutos, com a inscrição "Pendente de Pagamento". Dentro desse tempo o capitão pode pagar ou retomar o pagamento pelo painel. Sem pagamento, a inscrição é cancelada por expiração, a vaga é liberada e o primeiro da lista de espera é promovido. O time promovido segue a janela de 24 horas da RN07. | US03, US04 |
 
 ---
 
@@ -214,6 +223,8 @@
   *Motivo:* O sistema adota o modelo de jogo genérico, evitando dependência de credenciais restritas de publishers externos.
 - **Estorno/Reembolso Automático no Gateway:** O cancelamento com devolução automática de taxa não será automatizado via painel da plataforma.  
   *Motivo:* Eventuais casos de desistência ou cancelamento serão tratados administrativamente fora do sistema neste primeiro momento.
+- **Recursos Ilustrativos do Protótipo:** Vínculo obrigatório com Steam ou Faceit, anti-cheat, escrow de premiação, veto de mapas, boleto e parcelamento no cartão aparecem nas telas só como ambientação visual e não são funcionalidades do MVP.  
+  *Motivo:* O MVP cobre inscrição, pagamento sandbox e formação do elenco; esses itens exigiriam integrações externas fora do semestre.
 
 ---
 
@@ -234,3 +245,4 @@
 | :--- | :----- | :---------- |
 | 2026-09-24 | 1.0.0 | Versão inicial gerada e aprovada via entrevista `/utf-prd` |
 | 2026-09-24 | 1.1.0 | Ajustes pós-revisão: lista de espera, mínimo de jogadores por time, US07 promovida a Must Have, remoção de non-goal de streaming |
+| 2026-10-14 | 1.2.0 | Revisão da Entrega 1, alinhada ao protótipo revisado: prazo final no lugar de período, jogo na US01, reserva de 15 min no checkout (RN09), janela de 24 h da lista de espera (RN07), retomada de pagamento e pagamento recusado, convite por link sem cadastro (72 h), glossário com Convite, Elenco e Lista de Espera, RN05 com mínimo e máximo por campeonato, RN08 com taxa não devolvida, recursos ilustrativos fora de escopo |

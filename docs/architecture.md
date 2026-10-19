@@ -1,7 +1,7 @@
 # 🛠️ Architecture / Software Design Document
 
 **Projeto:** insc.gg — Sistema de Inscrição para Campeonatos de E-sports  
-**Versão:** 1.2.0  
+**Versão:** 1.3.0  
 **Última atualização:** 2026-10-14  
 
 > 🤖 **O `prd.md` responde _o quê_ o produto faz. Este responde _onde as coisas
@@ -21,7 +21,7 @@
 | Fluxos da IA | `.agents/workflows/` | PRD, backlog, jornadas e tokens, architecture, setup, ciclo por Issue, ciclo por tarefa, tutor |
 | Agentes (subagentes) | `.agents/agents/` (cascas em `.claude/`, `.cursor/` e `.opencode/`) | Implementador, revisores, auditor final e tutor |
 | Ficha da disciplina | `docs/checklist.md` | Regras do projeto, IDs e entregas |
-| Design (Protótipo Stitch) | [Protótipo no Stitch](https://stitch.withgoogle.com/projects/11000728704193360087) | Cores, tipografia, hierarquia visual e estados de tela |
+| Design (Protótipo Stitch) | [Protótipo no Stitch](https://stitch.withgoogle.com/preview/11000728704193360087?node-id=79ea04bf0cec42efa1638948eb9157d7) | Cores, tipografia, hierarquia visual e estados de tela |
 
 ---
 
@@ -75,7 +75,7 @@ Declaradas para atender rigorosamente aos IDs da ficha da disciplina (`docs/chec
 4. **Autenticação JWT e Controle de Acesso (ID9):**
    - Autenticação stateless via token JWT assinado (`@nestjs/jwt`).
    - Estratégia Passport (`JwtStrategy`) e guard `JwtAuthGuard`.
-   - Controle de permissões por perfil (`ORGANIZER`, `CAPTAIN`, `PLAYER`) via decorator `@Roles(...)` e `RolesGuard`.
+   - Controle de permissões por perfil (`ORGANIZER`, `CAPTAIN`) via decorator `@Roles(...)` e `RolesGuard`.
 
 5. **Padronização de Respostas e Tratamento de Erros (ID10):**
    - **Sucesso:** Interceptor global `TransformInterceptor` encapsula respostas no formato:
@@ -107,7 +107,7 @@ Declaradas para atender rigorosamente aos IDs da ficha da disciplina (`docs/chec
    - Integração com **Stripe Sandbox** (geração de Checkout Sessions com a taxa do torneio vinculada à `Registration`).
    - Rota de webhook `/api/payments/webhook` recebendo raw-body e validando a assinatura criptográfica via header `stripe-signature` com `stripe.webhooks.constructEvent`.
    - Idempotência: processamento validado por `stripePaymentIntentId` / `stripeSessionId` e log no `WebhookEvent`, garantindo que eventos duplicados não alterem o status repetidamente.
-   - Job/Cron com `@nestjs/schedule` para verificar expiração de inscrições: equipes promovidas da Lista de Espera têm uma janela de tolerância de **24 horas** a partir da promoção (ou até **2 horas antes do início do torneio**, o que vencer primeiro) para quitar a taxa antes de a vaga ser liberada para a próxima equipe da fila (resolvendo a dúvida de `docs/user-flows.md`).
+   - Job/Cron com `@nestjs/schedule`: (1) a cada minuto, cancela por expiração as inscrições `PENDING_PAYMENT` com `expiresAt` vencido (reserva de 15 minutos, US04 e RN09; 24 horas para o time promovido da lista de espera, RN07) e promove o próximo da fila; (2) ao fim do prazo de inscrição, cancela as que não atingiram o mínimo de jogadores (US09, RN08).
 
 ### 🌐 2.2. O contrato da API (ID14)
 
@@ -193,11 +193,11 @@ Monorepo estruturado em pastas isoladas por aplicação, orquestrado via `npm wo
 
 | Termo PRD (PT-BR) | Entidade técnica (EN) | Atributos principais |
 | :---------------- | :-------------------- | :------------------- |
-| **Usuário / Ator** | `User` | `id`, `name`, `email`, `passwordHash`, `role` (`ORGANIZER`, `CAPTAIN`, `PLAYER`), `createdAt` |
+| **Usuário / Ator** | `User` | `id`, `name`, `email`, `passwordHash`, `role` (`ORGANIZER`, `CAPTAIN`), `createdAt` |
 | **Campeonato** | `Tournament` | `id`, `title`, `game`, `entryFeeCents`, `maxSlots`, `minPlayersPerTeam`, `maxPlayersPerTeam`, `status` (`OPEN`, `CLOSED`, `FINISHED`), `organizerId`, `deadlineDate`, `createdAt` |
 | **Time (Equipe)** | `Team` | `id`, `name`, `tag`, `captainId`, `createdAt` |
-| **Membro / Convite** | `TeamMember` | `id`, `teamId`, `userId`, `role` (`CAPTAIN`, `STARTER`, `SUB`), `status` (`PENDING`, `ACCEPTED`, `REJECTED`), `joinedAt` |
-| **Inscrição** | `Registration` | `id`, `tournamentId`, `teamId`, `status` (`PENDING_PAYMENT`, `CONFIRMED`, `WAITING_LIST`, `CANCELLED`), `promotedAt`, `createdAt` |
+| **Elenco / Convite** | `TeamMember` | `id`, `teamId`, `userId` (opcional: o capitão tem; o convidado por link não), `inviteEmail`, `inviteToken`, `playerName`, `status` (`PENDING`, `ACCEPTED`, `REJECTED`), `expiresAt`, `joinedAt` |
+| **Inscrição** | `Registration` | `id`, `tournamentId`, `teamId`, `status` (`PENDING_PAYMENT`, `CONFIRMED`, `WAITING_LIST`, `CANCELLED`), `expiresAt`, `createdAt` |
 | **Pagamento / Ordem** | `Payment` | `id`, `registrationId`, `amountCents`, `status` (`PENDING`, `APPROVED`, `REJECTED`), `gatewayProvider` (`STRIPE`), `stripeSessionId`, `stripePaymentIntentId`, `paidAt`, `createdAt` |
 | **Log de Webhook** | `WebhookEvent` | `id`, `provider` (`STRIPE`), `externalEventId`, `payloadJson`, `processedAt` |
 
@@ -209,7 +209,7 @@ Monorepo estruturado em pastas isoladas por aplicação, orquestrado via `npm wo
 erDiagram
     User ||--o{ Tournament : "cria e gerencia (organizer)"
     User ||--o{ Team : "lidera como capitão"
-    User ||--o{ TeamMember : "compõe como jogador"
+    User |o--o{ TeamMember : "vinculado quando há conta"
     Team ||--o{ TeamMember : "possui no elenco"
     Tournament ||--o{ Registration : "recebe vagas de"
     Team ||--o{ Registration : "inscreve-se via"
@@ -220,7 +220,7 @@ erDiagram
         string email UK
         string passwordHash
         string name
-        enum role "ORGANIZER | CAPTAIN | PLAYER"
+        enum role "ORGANIZER | CAPTAIN"
         datetime createdAt
         datetime updatedAt
     }
@@ -252,9 +252,12 @@ erDiagram
     TeamMember {
         string id PK
         string teamId FK
-        string userId FK
-        enum role "CAPTAIN | STARTER | SUB"
+        string userId FK "opcional"
+        string inviteEmail
+        string inviteToken UK
+        string playerName
         enum status "PENDING | ACCEPTED | REJECTED"
+        datetime expiresAt
         datetime createdAt
         datetime joinedAt
     }
@@ -264,7 +267,7 @@ erDiagram
         string tournamentId FK
         string teamId FK
         enum status "PENDING_PAYMENT | CONFIRMED | WAITING_LIST | CANCELLED"
-        datetime promotedAt
+        datetime expiresAt
         datetime createdAt
         datetime updatedAt
     }
@@ -291,13 +294,15 @@ erDiagram
     }
 ```
 
+> Restrições únicas compostas (o Mermaid não as expressa): `Registration(tournamentId, teamId)`, por causa da RN01, e `TeamMember(teamId, inviteEmail)`, por causa da RN05. O capitão é identificado por `Team.captainId` e entra no elenco como `TeamMember` com status `ACCEPTED` ao criar o time.
+
 ### 🌍 5.3. O banco por ambiente
 
 | Ambiente | Onde roda | Como conecta |
 | :--- | :--- | :--- |
-| **Local** | Docker local (`postgres:16-alpine` via `docker-compose.yml`) | `DATABASE_URL="postgresql://postgres:postgres@localhost:5432/insc_db"` |
-| **CI** | GitHub Actions Service Container (`postgres:16-alpine`) | `DATABASE_URL="postgresql://postgres:postgres@localhost:5432/insc_test_db"` |
-| **Produção (ID19)** | Nuvem **Neon.tech** (PostgreSQL Serverless com Connection Pooling) | `DATABASE_URL="postgresql://...neon.tech/neondb?sslmode=require&pgbouncer=true"` |
+| **Local** | Docker local (`postgres:16-alpine` via `docker-compose.yml`) | variável `DATABASE_URL` no `.env` |
+| **CI** | Service container do GitHub Actions (`postgres:16-alpine`) | variável `DATABASE_URL` definida no workflow |
+| **Produção (ID19)** | Neon.tech (PostgreSQL serverless com connection pooling) | variável `DATABASE_URL` nas variáveis da plataforma |
 
 > 🔒 Credenciais **nunca** aparecem no repositório — nem em código, nem em
 > YAML, nem em doc. São lidas exclusivamente das variáveis de ambiente (`.env` local ou secrets na nuvem).
@@ -311,11 +316,8 @@ erDiagram
 
 | Domínio | Módulo (`apps/api/src/modules/`) | Guard | Dados (Prisma) | US Relacionada |
 | :------ | :------------------------------- | :---- | :------------- | :------------- |
-| **Auth** | `auth/` | `JwtAuthGuard` | `User` | Base |
-| **Tournaments** | `tournaments/` | `JwtAuthGuard`, `RolesGuard('ORGANIZER')` | `Tournament` | US01, US09 |
-| **Teams** | `teams/` | `JwtAuthGuard`, `RolesGuard('CAPTAIN')` | `Team`, `TeamMember` | US02, US06, US07 |
-| **Registrations** | `registrations/` | `JwtAuthGuard`, `RolesGuard('CAPTAIN')` | `Registration` | US03, US05, US08 |
-| **Payments** | `payments/` | `JwtAuthGuard` (checkout), Público com validação de assinatura (webhook) | `Payment`, `WebhookEvent` | US04, US05 |
+
+_Ainda sem histórias implementadas: cada linha entra quando a história correspondente for mesclada._
 
 ---
 
@@ -325,6 +327,7 @@ erDiagram
 | :--- | :----- | :---------- |
 | 2026-10-02 | 1.0.0 | Versão inicial gerada via `/utf-architecture` cobrindo todas as decisões de stack, padrões para IDs da disciplina e modelo ER. |
 | 2026-10-14 | 1.2.0 | Atualização de stack com validação Context7: NestJS v12 e Prisma ORM v7 GA; definição de gateway Stripe Sandbox; janela de 24h/2h para promoção na lista de espera; e confirmação de npm workspaces. |
+| 2026-10-14 | 1.3.0 | Revisão da Entrega 1, alinhada ao protótipo revisado: reserva de 15 min no checkout e janela de 24 h só para o time promovido (`expiresAt` no lugar de `promotedAt`), convite por link sem conta (`TeamMember` com `inviteEmail`, `inviteToken` e `expiresAt`; perfil `PLAYER` removido), `TeamMember` sem `role`, restrições únicas compostas, §5.3 sem connection string, §6 esvaziado, link público do protótipo. |
 
 ---
 

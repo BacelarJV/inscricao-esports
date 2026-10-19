@@ -1,8 +1,8 @@
 # 🗺️ Jornadas de Usuário
 
 **Projeto:** Sistema de Inscrição para Campeonatos de E-sports  
-**Versão:** 1.0.0  
-**Última atualização:** 2026-09-25  
+**Versão:** 1.1.0  
+**Última atualização:** 2026-10-14  
 
 > 🤖 **Este documento é a fonte da verdade sobre O QUE A PESSOA VIVE na tela** —
 > o caminho do primeiro clique até o objetivo, e principalmente os pontos onde ela
@@ -31,28 +31,31 @@ flowchart TD
     E --> F["«pessoa» é direcionada para o checkout"]
     F --> G{"O que a «pessoa» faz?"}
     G -->|"Paga a taxa"| H["Retorna para a plataforma"]
-    G -->|"Fecha a aba / Desiste"| X1[["Some sem pagar —<br/>vaga segue retida"]]
+    G -->|"Fecha a aba / Desiste"| X1[["Some sem pagar —<br/>vaga segue reservada por 15 min"]]
 
-    X1 --> P{"Prazo do campeonato encerrou?"}
+    X1 --> P{"Passaram 15 min<br/>desde a reserva?"}
     P -->|"Não"| Q["«pessoa» pode retomar pagamento<br/>pelo painel do seu time"]
     Q --> F
-    P -->|"Sim"| R["Sistema expira a inscrição pendente<br/>e libera a vaga"]
+    P -->|"Sim"| R["Sistema expira a inscrição pendente,<br/>libera a vaga e promove o primeiro da fila"]
 
     H --> I{"Confirmação do gateway já chegou?"}
     I -->|"Sim (webhook processado)"| J(["Inscrição Confirmada<br/>(Vaga e time garantidos)"])
     I -->|"Ainda em processamento"| K["«pessoa» vê tela 'Processando Pagamento'<br/>e acompanha no painel"]
+
+    C --> C2["Vaga liberada: o primeiro da fila é promovido<br/>(Pendente de Pagamento, 24 h para pagar)"]
+    C2 --> F
+    I -->|"Pagamento recusado"| Z["Sistema marca o pagamento como Recusado<br/>(inscrição segue Pendente de Pagamento)"]
+    Z --> P
 
     style X1 fill:#ffe0e0,stroke:#c62828
 ```
 
 **O que decidimos sobre o nó vermelho:**
 
-Se o capitão fechar a aba ou desistir no momento do checkout, a inscrição permanece com status "Pendente de Pagamento" e a vaga continua reservada para a sua equipe até o encerramento do prazo final de inscrições do campeonato — não há timeout curto de expiração. O capitão pode retornar a qualquer momento antes do término das inscrições através do painel da equipe para concluir o pagamento. Caso o prazo do torneio expire sem que o pagamento seja liquidado, o sistema expira a inscrição pendente automaticamente e libera a vaga (conforme US04 e RN02).
+Se o capitão fechar a aba ou desistir no checkout, a inscrição fica "Pendente de Pagamento" e a vaga continua reservada ao time por 15 minutos, contados da confirmação da inscrição; as telas de detalhes, confirmação, checkout e processamento mostram esse cronômetro. Dentro dos 15 minutos o capitão pode voltar pelo painel do time e concluir o pagamento. Passado o tempo, o sistema cancela a inscrição por expiração, libera a vaga e promove o primeiro da lista de espera (US04, RN02 e RN09); o capitão pode refazer a inscrição se ainda houver vaga. O time promovido da lista de espera tem uma janela maior, de 24 horas contadas da promoção (RN07), porque a vaga costuma ser liberada quando o prazo do campeonato já está acabando. Se o pagamento for recusado, a inscrição continua pendente e o capitão pode tentar de novo enquanto a reserva durar.
 
 ---
 
 ## Dúvidas em aberto
 
-| # | Dúvida | Onde ela precisa ser resolvida |
-| - | ------ | ------------------------------ |
-| 1 | Quando uma vaga é liberada após o término do prazo regular (ou próximo do fim), quanto tempo o primeiro time da Lista de Espera tem para pagar? | `/utf-architecture` (definição de job de expiração e janelas de tolerância) |
+Nenhuma. A dúvida sobre quanto tempo o time promovido da lista de espera tem para pagar foi resolvida: 24 horas contadas da promoção (RN07 do `docs/prd.md`).
